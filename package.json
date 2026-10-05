@@ -1,0 +1,25 @@
+{
+  "name": "project-1-server-api",
+  "version": "1.0.0",
+  "description": "",
+  "homepage": "https://github.com/ParvelSel/Project-1-Server-API#readme",
+  "bugs": {
+    "url": "https://github.com/ParvelSel/Project-1-Server-API/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ParvelSel/Project-1-Server-API.git"
+  },
+  "license": "ISC",
+  "author": "Parvel",
+  "type": "commonjs",
+  "main": "eslint.config.js",
+  "scripts": {
+    "start": "node ./src/server.js",
+    "test": "echo \"Error: no test specified\""
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "globals": "^17.13.0"
+  }
+}

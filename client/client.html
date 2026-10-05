@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>Database API</title>
+  <link rel="stylesheet" type="text/css" href="/style.css">
+</head>
+
+<body>
+  <div class="mainContent">
+    <a href="/">Test the Application Here</a><br>
+    <a href="/docs">View the Documentation Here</a>
+    <h1>Movie API Test Application</h1>
+
+    <div class="endpoint">
+      <h2 class="collapsible">
+        /api/getFilmTitles <span class="methods"><code>GET</code> <code>HEAD</code></span>
+      </h2>
+      <div class="content">
+        <div class="content-box">
+          <h3>Test This Endpoint</h3>
+          <form data-method="GET" data-endpoint="/api/getFilmTitles">
+            <label>Actor: <input type="text" name="actor"></label><br>
+            <label>Year: <input type="text" name="year"></label><br>
+            <label><input type="radio" name="method" value="GET" checked> GET</label>
+            <label><input type="radio" name="method" value="HEAD"> HEAD</label><br>
+            <button type="submit">Send Request</button>
+          </form>
+          <pre class="result"></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <h2 class="collapsible">
+        /api/getFilms <span class="methods"><code>GET</code> <code>HEAD</code></span>
+      </h2>
+      <div class="content">
+        <div class="content-box">
+          <h3>Test This Endpoint</h3>
+          <form data-method="GET" data-endpoint="/api/getFilms">
+            <label>Title: <input type="text" name="title"></label><br>
+            <label>Actor: <input type="text" name="actor"></label><br>
+            <label>Year: <input type="text" name="year"></label><br>
+            <label><input type="radio" name="method" value="GET" checked> GET</label>
+            <label><input type="radio" name="method" value="HEAD"> HEAD</label><br>
+            <button type="submit">Send Request</button>
+          </form>
+          <pre class="result"></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <h2 class="collapsible">
+        /api/getFilm <span class="methods"><code>GET</code> <code>HEAD</code></span>
+      </h2>
+      <div class="content">
+        <div class="content-box">
+          <h3>Test This Endpoint</h3>
+          <form data-method="GET" data-endpoint="/api/getFilm">
+            <label>Title: <input type="text" name="title"></label><br>
+            <label><input type="radio" name="method" value="GET" checked> GET</label>
+            <label><input type="radio" name="method" value="HEAD"> HEAD</label><br>
+            <button type="submit">Send Request</button>
+          </form>
+          <pre class="result"></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <h2 class="collapsible">
+        /api/getAllFilms <span class="methods"><code>GET</code> <code>HEAD</code></span>
+      </h2>
+      <div class="content">
+        <div class="content-box">
+          <h3>Test This Endpoint</h3>
+          <form data-method="GET" data-endpoint="/api/getAllFilms">
+            <label><input type="radio" name="method" value="GET" checked> GET</label>
+            <label><input type="radio" name="method" value="HEAD"> HEAD</label><br>
+            <button type="submit">Send Request</button>
+          </form>
+          <pre class="result"></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <h2 class="collapsible">
+        /api/addFilm <span class="methods"><code>POST</code></span>
+      </h2>
+      <div class="content">
+        <div class="content-box">
+          <h3>Test This Endpoint</h3>
+          <form data-method="POST" data-endpoint="/api/addFilm">
+            <label>Title: <input type="text" name="title"></label><br>
+            <label>Year: <input type="text" name="year"></label><br>
+            <label>Genres: <input type="text" name="genres"></label><br>
+            <label>Cast: <input type="text" name="cast"></label><br>
+            <button type="submit">Send Request</button>
+          </form>
+          <pre class="result"></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint">
+      <h2 class="collapsible">
+        /api/rateFilm <span class="methods"><code>POST</code></span>
+      </h2>
+      <div class="content">
+        <div class="content-box">
+          <h3>Test This Endpoint</h3>
+          <form data-method="POST" data-endpoint="/api/rateFilm">
+            <label>Title: <input type="text" name="title"></label><br>
+            <label>Rating: <input type="number" name="rating" min="1" max="5"></label><br>
+            <button type="submit">Send Request</button>
+          </form>
+          <pre class="result"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    Austin Willoughby - 2024 - IGME 430 Project 1 Example
+  </footer>
+
+</body>
+
+</html>
