@@ -2,131 +2,346 @@
 <html lang="en">
 
 <head>
-  <title>Database API</title>
+  <title>Book Search API</title>
   <link rel="stylesheet" type="text/css" href="/style.css">
 </head>
 
+<script>
+  //Init to set all my submit buttons up.
+  const init = () => {
+    const searchForm = document.getElementById('searchForm');
+    searchForm.addEventListener('submit', (event) => {
+      event.preventDefault();
+      handleGetHead();
+    });
+    const addBookForm = document.getElementById('addBookForm');
+    addBookForm.addEventListener('submit', (event) => {
+      event.preventDefault();
+      handleAddBook();
+    });
+    const updateBookForm = document.getElementById('updateBookForm');
+    updateBookForm.addEventListener('submit', (event) => {
+      event.preventDefault();
+      handleUpdateBook();
+    });
+  }
+  
+  window.onload = init;
+  
+  //Update book with the added bonus of it being one endpoint 
+  //encompasing several different fields to change. This combined with the updateBook 
+  //function are intended to be my above and beyond. 
+  //I wanted menus to be as reusable as possible.
+  const handleUpdateBook = async () => {
+    const title = document.getElementById('titleOfUpdatee').value;
+    const term = document.getElementById('newValue').value;
+    const typeToUpdate = document.getElementById('typeToUpdateDropdown').value;
+    const format = document.getElementById('updateFormatDropdown').value;
+    if (!title || !term) {
+      document.getElementById('status').innerHTML = '<h2>All fields are required.</h2>';
+      return;
+    }
+    let bookData;
+    if(format === 'application/json'){
+      bookData = {
+        title: title,
+        term: term,
+        typeToUpdate: typeToUpdate
+      };
+      bookData = JSON.stringify(bookData);
+    }else{
+      bookData = `title=${encodeURIComponent(title)}&term=${encodeURIComponent(term)}&typeToUpdate=${encodeURIComponent(typeToUpdate)}`;
+    }
+    
+    const response = await postRequester(bookData, format, '/updateBook');
+    if (response.ok) {
+      document.getElementById('status').innerHTML = '<h2>Book updated successfully!</h2>';
+    } else {
+      document.getElementById('status').innerHTML = '<h2>Error updating book.</h2>';
+    }
+  }
+
+  //Add book handler. Needs to be separate because of genre being optional.
+  const handleAddBook = async () => {
+    //ALL VALUES for making a new book entry. Genres can be 
+    //omitted, but otherwise they're all required.
+    const title = document.getElementById('title').value;
+    const author = document.getElementById('author').value;
+    const country = document.getElementById('country').value;
+    const language = document.getElementById('language').value;
+    const pages = document.getElementById('pages').value;
+    const year = document.getElementById('year').value;
+    const genresPlain = document.getElementById('genres').value;
+    const link = document.getElementById('link').value;
+    let genres;
+    //Checking for good genre input.
+    if(genresPlain&&genresPlain.trim()!==''){
+      genres = genresPlain.split(', ').map(genre => genre.trim());
+    }
+    //Extra value for determining json or urlencoded for the body.
+    const format = document.getElementById('FormatDropdown').value;
+    //Checks for all values being present.
+    if (!title || !author || !country || !language || !pages || !year || !link) {
+      document.getElementById('status').innerHTML = '<h2>All fields are required.</h2>';
+      return;
+    }
+    let bookData;
+    //A set of if/else statements for 4 cases.
+    //Case 1: JSON with genres
+    // Case 2: JSON without genres
+    // Case 3: Urlencoded with genres
+    // Case 4: Urlencoded without genres
+    //Less complicated than it looks, just a lot of repetition. 
+    // Could mayyyybe be a switch statement, but realistically 
+    // it wouldn't really make optimization any better.
+    if(format==='application/json'){
+      if(genres){
+        bookData = {
+          title: title,
+          author: author,
+          country: country,
+          language: language,
+          pages: pages,
+          year: year,
+          link: link,
+          genres: genres
+        };
+        bookData = JSON.stringify(bookData);
+      } else {
+        bookData = {
+          title: title,
+          author: author,
+          country: country,
+          language: language,
+          pages: pages,
+          year: year,
+          link: link
+        };
+        bookData = JSON.stringify(bookData);
+      }
+    }else{
+      if(genres){
+        bookData = `title=${encodeURIComponent(title)}&author=${encodeURIComponent(author)}&country=${encodeURIComponent(country)}&language=${encodeURIComponent(language)}&pages=${encodeURIComponent(pages)}&year=${encodeURIComponent(year)}&link=${encodeURIComponent(link)}&genres=${encodeURIComponent(genres.join(','))}`;
+      } else {
+        bookData = `title=${encodeURIComponent(title)}&author=${encodeURIComponent(author)}&country=${encodeURIComponent(country)}&language=${encodeURIComponent(language)}&pages=${encodeURIComponent(pages)}&year=${encodeURIComponent(year)}&link=${encodeURIComponent(link)}`;
+      }
+    }
+    const response = await postRequester(bookData, format, '/addBook');
+    //Response validity checker.
+    if (response.ok) {
+      document.getElementById('status').innerHTML = '<h2>Book added successfully!</h2>';
+    } else {
+      document.getElementById('status').innerHTML = '<h2>Error adding book.</h2>';
+    }
+  }
+
+
+
+  //Crux of Head and Get requests. Does the core OOP for both, 
+  //and sends each down their respective pipelines.
+  const handleGetHead = async () => {
+    const term = document.getElementById('term').value;
+    const filter = document.getElementById('filterDropdown').value;
+    const operation = document.getElementById('OperationDropdown').value;
+    if (!term) {
+      document.getElementById('status').innerHTML = '<h2>No search made. Choose a filter and type a term.</h2>';
+      return;
+    }
+    document.getElementById('status').innerHTML = '<h2>Searching...</h2>';
+    switch (operation){
+      case 'GET':
+        formatGet(await getRequester(term, filter));
+        break;
+      case 'HEAD':
+        formatHead(await headRequester(term, filter));
+        break;
+    }
+  }
+  
+  
+  
+  //POST Helpers
+  //Simple post requester for the addBooks and updateBook stuff. 
+  //Uses body, format, and the fucntion it's going to.
+  const postRequester = async (bookData, format, route) => {
+    const response = await fetch(route, {
+      method: 'POST',
+      headers: {
+        'Content-Type': format
+      },
+      body: bookData
+    });
+    return response;
+  }
+
+
+
+  //GET helpers
+  //Creates GET requests. Designed to be a insertable function for all
+  //relevant GET requests.
+  const getRequester = async (term, filter) => {
+    const page = filter;
+    const response = await fetch(`${filter}?term=${encodeURIComponent(term)}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'filter': filter,
+        'term': term
+      }
+    });
+    return response;
+  }
+  
+  //Designed to layout the page's entries in an easy to read way. Explicitly for GET requests.
+  const formatGet = async (response) => {
+    if(response.status===204){
+      document.getElementById('status').innerHTML = `<h2>Code:</h2><h3>204</h3><h3>Message: No results found.</h3>`;
+      document.getElementById('results').innerHTML = `<h2>No results found.</h2>`;
+      return;
+    }
+    const data = await response.json();
+    document.getElementById('status').innerHTML = `<h2>Code:</h2><h3>${data.code.id}</h3><h3>Message: ${data.code.message}</h3>`;
+    let bookListHTML = '';
+    for(const book of data.bookList){
+      bookListHTML += `<div class="entry">
+        <h4><strong>${book.title}</strong> by ${book.author}</h4>
+        <p>From ${book.country}</p>
+        <p>In ${book.language}</p>
+        <p>${book.pages} pages</p>
+        <p>Link: ${book.link}</p>
+        <p>Published in ${book.year}</p>`;
+       if(book.genres){
+        bookListHTML += `<p>Genres: ${book.genres.join(', ')}</p>`;
+       }else{
+        bookListHTML += `<p>Genres: None</p>`;
+       }
+       bookListHTML += `</div>`;
+    }
+    document.getElementById('results').innerHTML = bookListHTML;
+  }
+
+
+
+  //HEAD helpers
+  //A mimic of the GET request, but for HEAD requests. Designed to be a insertable function for all relevant HEAD requests.
+  const headRequester = async (term, filter) => {
+    const page = filter;
+    const response = await fetch(`${filter}?term=${encodeURIComponent(term)}`, {
+      method: 'HEAD',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'filter': filter,
+        'term': term
+      }
+    });
+    return response;
+  }
+
+  //Just like the one for GET requests, but for HEAD requests. Cuts out the body and instead just returns an easy to read status and the headers in a raw form.
+  const formatHead = async (response) => {
+    if(response.status===204){
+      document.getElementById('status').innerHTML = `<h2>Code:</h2><h3>204</h3><h3>Message: No results found.</h3>`;
+      document.getElementById('results').innerHTML = `<h2>${JSON.stringify(Object.fromEntries(response.headers))}</h2>`;
+      return;
+    }
+    document.getElementById('status').innerHTML = `<h2>Code:</h2><h3>${response.status}</h3><h3>Message: ${response.headers.get('Message')}</h3>`;
+    document.getElementById('results').innerHTML = `<h2>${JSON.stringify(Object.fromEntries(response.headers))}</h2>`;
+  }
+</script>
+
 <body>
-  <div class="mainContent">
-    <a href="/">Test the Application Here</a><br>
-    <a href="/docs">View the Documentation Here</a>
-    <h1>Movie API Test Application</h1>
+  <h1>Book API</h1>
+  <h2><a href="/documentation">Documentation</a></h2>
 
-    <div class="endpoint">
-      <h2 class="collapsible">
-        /api/getFilmTitles <span class="methods"><code>GET</code> <code>HEAD</code></span>
-      </h2>
-      <div class="content">
-        <div class="content-box">
-          <h3>Test This Endpoint</h3>
-          <form data-method="GET" data-endpoint="/api/getFilmTitles">
-            <label>Actor: <input type="text" name="actor"></label><br>
-            <label>Year: <input type="text" name="year"></label><br>
-            <label><input type="radio" name="method" value="GET" checked> GET</label>
-            <label><input type="radio" name="method" value="HEAD"> HEAD</label><br>
-            <button type="submit">Send Request</button>
-          </form>
-          <pre class="result"></pre>
-        </div>
-      </div>
-    </div>
 
-    <div class="endpoint">
-      <h2 class="collapsible">
-        /api/getFilms <span class="methods"><code>GET</code> <code>HEAD</code></span>
-      </h2>
-      <div class="content">
-        <div class="content-box">
-          <h3>Test This Endpoint</h3>
-          <form data-method="GET" data-endpoint="/api/getFilms">
-            <label>Title: <input type="text" name="title"></label><br>
-            <label>Actor: <input type="text" name="actor"></label><br>
-            <label>Year: <input type="text" name="year"></label><br>
-            <label><input type="radio" name="method" value="GET" checked> GET</label>
-            <label><input type="radio" name="method" value="HEAD"> HEAD</label><br>
-            <button type="submit">Send Request</button>
-          </form>
-          <pre class="result"></pre>
-        </div>
-      </div>
-    </div>
+  <!--Search form.
+  For my extra distance I wanted to make forms multipurpose-->
+  <h2>Search for a book:</h2>
+  <form id="searchForm">
+    <select id="filterDropdown" name="filterDropdown">
+      <option value="/getBooksFromCountry">Country</option>
+      <option value="/getBooksFromLanguage">Language</option>
+      <option value="/getBooksFromAuthor">Author</option>
+      <option value="/getBooksFromTitle">Title</option>
+    </select>
+    <select id="OperationDropdown" name="OperationDropdown">
+      <option value="GET">GET</option>
+      <option value="HEAD">HEAD</option>
+    </select>
+    <input type="search" id="term" name="term">
+    <button type="submit">Search</button>
+  </form>
 
-    <div class="endpoint">
-      <h2 class="collapsible">
-        /api/getFilm <span class="methods"><code>GET</code> <code>HEAD</code></span>
-      </h2>
-      <div class="content">
-        <div class="content-box">
-          <h3>Test This Endpoint</h3>
-          <form data-method="GET" data-endpoint="/api/getFilm">
-            <label>Title: <input type="text" name="title"></label><br>
-            <label><input type="radio" name="method" value="GET" checked> GET</label>
-            <label><input type="radio" name="method" value="HEAD"> HEAD</label><br>
-            <button type="submit">Send Request</button>
-          </form>
-          <pre class="result"></pre>
-        </div>
-      </div>
-    </div>
 
-    <div class="endpoint">
-      <h2 class="collapsible">
-        /api/getAllFilms <span class="methods"><code>GET</code> <code>HEAD</code></span>
-      </h2>
-      <div class="content">
-        <div class="content-box">
-          <h3>Test This Endpoint</h3>
-          <form data-method="GET" data-endpoint="/api/getAllFilms">
-            <label><input type="radio" name="method" value="GET" checked> GET</label>
-            <label><input type="radio" name="method" value="HEAD"> HEAD</label><br>
-            <button type="submit">Send Request</button>
-          </form>
-          <pre class="result"></pre>
-        </div>
-      </div>
-    </div>
+  <!--Additional Book form-->
+  <form id="addBookForm">
+    <h2>Add a book:</h2>
+    <label for="title">Title:</label>
+    <input type="text" id="title" name="title" placeholder="Title Here"><br>
+    <label for="author">Author:</label>
+    <input type="text" id="author" name="author" placeholder="Author Here"><br>
+    <label for="country">Country:</label>
+    <input type="text" id="country" name="country" placeholder="Country Here"><br>
+    <label for="language">Language:</label>
+    <input type="text" id="language" name="language" placeholder="Language Here"><br>
+    <label for="pages">Pages:</label>
+    <input type="number" id="pages" name="pages" placeholder="Pages Here"><br>
+    <label for="year">Year:</label>
+    <input type="number" id="year" name="year" placeholder="Year Here"><br>
+    <label for="genres">Genres:</label>
+    <input type="text" id="genres" name="genres" placeholder='comma-separated ex. "Fiction, Mystery"'><br>
+    <label for="link">Link:</label>
+    <input type="text" id="link" name="link" placeholder="Link Here"><br>
+    <select id="FormatDropdown" name="FormatDropdown">
+      <option value="application/x-www-form-urlencoded">Urlencoded</option>
+      <option value="application/json">JSON</option>
+    </select><br>
+    <button type="submit">Add Book</button>
+  </form>
 
-    <div class="endpoint">
-      <h2 class="collapsible">
-        /api/addFilm <span class="methods"><code>POST</code></span>
-      </h2>
-      <div class="content">
-        <div class="content-box">
-          <h3>Test This Endpoint</h3>
-          <form data-method="POST" data-endpoint="/api/addFilm">
-            <label>Title: <input type="text" name="title"></label><br>
-            <label>Year: <input type="text" name="year"></label><br>
-            <label>Genres: <input type="text" name="genres"></label><br>
-            <label>Cast: <input type="text" name="cast"></label><br>
-            <button type="submit">Send Request</button>
-          </form>
-          <pre class="result"></pre>
-        </div>
-      </div>
-    </div>
+  <!--Book Update Form
+  More of my extra mile. Multipurpose POST-->
+  <form id="updateBookForm">
+    <h2>Update a book:</h2>
+    <label for="titleOfUpdatee">Title of Book to Update:</label>
+    <input type="text" id="titleOfUpdatee" name="titleOfUpdatee" placeholder="Title Here"><br>
+    <select id="typeToUpdateDropdown" name="typeToUpdateDropdown">
+      <option value="Country">Country</option>
+      <option value="Language">Language</option>
+      <option value="Author">Author</option>
+      <option value="Link">Link</option>
+    </select><br>
+    <label for="newValue">New Value:</label>
+    <input type="text" id="newValue" name="newValue" placeholder="New Value Here"><br>
+    <select id="updateFormatDropdown" name="updateFormatDropdown">
+      <option value="application/x-www-form-urlencoded">Urlencoded</option>
+      <option value="application/json">JSON</option>
+    </select><br>
+    <button type="submit">Update Book</button>
+  </form>
+  
 
-    <div class="endpoint">
-      <h2 class="collapsible">
-        /api/rateFilm <span class="methods"><code>POST</code></span>
-      </h2>
-      <div class="content">
-        <div class="content-box">
-          <h3>Test This Endpoint</h3>
-          <form data-method="POST" data-endpoint="/api/rateFilm">
-            <label>Title: <input type="text" name="title"></label><br>
-            <label>Rating: <input type="number" name="rating" min="1" max="5"></label><br>
-            <button type="submit">Send Request</button>
-          </form>
-          <pre class="result"></pre>
-        </div>
-      </div>
-    </div>
+  <!--Status Block-->
+  <div id="status">
+    <h2>
+      Search for a book: Filter by country, language, author, or title. Choose GET or HEAD for their respective operations.<br>
+      Add a book: Fill out all fields and choose the format for the request body.<br>
+      Update a book: Fill out the title of the book to update, choose what value to update, the replacement.<br>
+    </h2>
   </div>
 
-  <footer>
-    Austin Willoughby - 2024 - IGME 430 Project 1 Example
-  </footer>
 
+  <!--Result Block-->
+  <h2>Results:</h2>
+  <div id="results">
+    
+  </div>
 </body>
 
+<!--I know that guy :O-->
+<footer>
+  <p>Made by Sam Denton</p>
+</footer>
 </html>

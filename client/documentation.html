@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>Book Search API Documentation</title>
+  <link rel="stylesheet" type="text/css" href="/style.css">
+</head>
+
+<body>
+  <h1>Book Search API Documentation</h1>
+  <div>
+  <h2>Country Filter</h2>
+  <h3>/getBooksFromCountry</h3>
+  <h3>GET, HEAD</h3>
+  <h4>Query: Term(Required)</h4>
+  <p>Either a GET or HEAD. Will contain a filtered list of all of<br>
+    the books in the json that have the term in the relevant property(Country).</p>
+  </div>
+  <br>
+  <div>
+  <h2>Language Filter</h2>
+  <h3>/getBooksFromLanguage</h3>
+  <h3>GET, HEAD</h3>
+  <h4>Query: Term(Required)</h4>
+  <p>Either a GET or HEAD. Will contain a filtered list of all of<br>
+    the books in the json that have the term in the relevant property(Language).</p>
+  </div>
+  <br>
+  <div>
+  <h2>Author Filter</h2>
+  <h3>/getBooksFromAuthor</h3>
+  <h3>GET, HEAD</h3>
+  <h4>Query: Term(Required)</h4>
+  <p>Either a GET or HEAD. Will contain a filtered list of all of<br>
+    the books in the json that have the term in the relevant property(Author).</p>
+  </div>
+  <br>
+  <div>
+  <h2>Title Filter</h2>
+  <h3>/getBooksFromTitle</h3>
+  <h3>GET, HEAD</h3>
+  <h4>Query: Term(Required)</h4>
+  <p>Either a GET or HEAD. Will contain a filtered list of all of<br>
+    the books in the json that have the term in the relevant property(Title).</p>
+  </div>
+  <br>
+  <div>
+  <h2>Update Book</h2>
+  <h3>/updateBook</h3>
+  <h3>POST</h3>
+  <h4>Body: Term, Type to update, Title</h4>
+  <p>Only POST. Updates an existing book in the internal variable representing the JSON file.<br>
+    It will not edit the JSON file and all data added will be reset on server reboot. This<br> 
+    endpoint is mutable, for the purpose of allowing 4 of the different values within a given<br> 
+    book to be changed</p>
+  </div>
+  <br>
+  <div>
+  <h2>Add Book</h2>
+  <h3>/addBook</h3>
+  <h3>POST</h3>
+  <h4>Body: Title(Required), Author(Required), Language(Required), Country(Required), Link(Required), Pages(Required), Year(Required), Genres(Optional)</h4>
+  <p>Only POST. Add a new book to the internal variable representing the JSON file.<br>
+    It will not edit the JSON file and all data added will be reset on server reboot.</p>
+  </div>
+</body>
+<footer>
+  <p>Made by Sam Denton</p>
+</footer>
+</html>
